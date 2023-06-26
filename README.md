@@ -1,0 +1,2 @@
+# OpenProject on NixOS
+
