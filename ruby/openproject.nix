@@ -1,9 +1,10 @@
 { lib
 , stdenv
 , fetchFromGitHub
+, runCommand
 , bundlerEnv
 , fetchNpmDeps
-, ruby_3_2
+, ruby_3_3
 , defaultGemConfig
 , makeWrapper
 , which
@@ -11,26 +12,32 @@
 }:
 
 let
-  version = "12.5.7";
+  version = "14.4.0";
 
   rubyEnv = bundlerEnv {
     name = "openproject-env-${version}";
 
-    ruby = ruby_3_2;
-    gemdir = ./.;
+    ruby = ruby_3_3;
+    gemdir = src;
     groups = [ "development" "ldap" "markdown" "common_mark" "minimagick" "test" ];
   };
 
-  src = fetchFromGitHub {
+  origSrc = fetchFromGitHub {
     owner = "opf";
     repo = "openproject";
-    rev = "53b19adcd5e6feffec0d0daa47f5ff480f3ab04b";
-    hash = "sha256-3YniGdLmOh71cqJ5EzT+tpwN1Ru9NiC/2CL8aDEEmNA=";
+    rev = "v${version}";
+    hash = "sha256-1bOM5exfa8XgfPoSxI2b3ELf8nugOLiVrYAQih893Ak=";
   };
+
+  src = runCommand "openproject-${version}-src" {} ''
+    cp -R ${origSrc} $out
+    chmod u+w $out
+    cp ${./gemset.nix} $out/gemset.nix
+  '';
 
   offlineNpmCache = fetchNpmDeps {
     src = src + "/frontend";
-    hash = "sha256-cGrgMwhh/WfahMd8TbzHZ6PruU+4V7cogWJp8gMCIlI=";
+    hash = "sha256-8tuu/OIg3YK3dSPy58TvZl/I1VRW6cOiwbU9E3ndmS0=";
   };
 in
   stdenv.mkDerivation rec {

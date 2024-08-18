@@ -1,8 +1,8 @@
 {
   description = "OpenProject Nix";
 
-  # inputs.nixpkgs.url = "github:NixOS/nixpkgs/nixos-unstable";
-  inputs.nixpkgs.url = "github:pub-solar/nixpkgs/ruby-gemfile-relative-modules";
+  inputs.nixpkgs.url = "github:NixOS/nixpkgs/nixos-unstable";
+  # inputs.nixpkgs.url = "github:pub-solar/nixpkgs/ruby-gemfile-relative-modules";
 
   inputs.systems.url = "github:nix-systems/default";
 
@@ -38,7 +38,7 @@
             # PATH here
             devshell.packages = with pkgs; [
               bundix
-              ruby_3_2
+              ruby_3_3
             ];
             commands = [
               {
