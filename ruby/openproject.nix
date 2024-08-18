@@ -5,7 +5,10 @@
 , bundlerEnv
 , fetchNpmDeps
 , ruby_3_3
+, rust
+, writeShellScriptBin
 , defaultGemConfig
+, buildRubyGem
 , makeWrapper
 , which
 , nixosTests
@@ -14,12 +17,48 @@
 let
   version = "14.4.0";
 
+  opf-ruby = ruby_3_3;
+
+  rustPackages = rust.packages.stable;
+  rustPlatform = rustPackages.rustPlatform;
+
   rubyEnv = bundlerEnv {
     name = "openproject-env-${version}";
 
-    ruby = ruby_3_3;
+    ruby = opf-ruby;
     gemdir = src;
     groups = [ "development" "ldap" "markdown" "common_mark" "minimagick" "test" ];
+    extraConfigPaths = [ "${src}/Gemfile.modules" ];
+    gemConfig = defaultGemConfig // {
+      commonmarker = attrs: {
+        cargoDeps = rustPlatform.fetchCargoTarball {
+          ## Uglyhack gem unpack
+          ## see <nixpkgs/pkgs/development/ruby-modules/gem>
+          src = runCommand "commonmarker-src" {
+            inherit (buildRubyGem attrs) src;
+          } ''
+            ${opf-ruby}/bin/gem unpack $src --target=container
+            cp -R container/* $out
+          '';
+          name = "commonmarker-cargodeps";
+          hash = "sha256-SKUb4SGDM1+RqUk2EzsInNM9nIs7c0Rx0t5mwWZConA=";
+        };
+        dontBuild = false; ## so that we get rust source
+        # CARGO_NET_OFFLINE = "true";
+        # HOME = "/build"; # for finding cargo conf
+        # exec ${rust.envVars.setEnv} CARGO_NET_OFFLINE=true HOME=/build ${rustPlatform.rust.cargo}/bin/cargo "$@"
+        preInstall = attrs.preInstall or "" + ''
+          export PATH="${writeShellScriptBin "cargo" ''
+            set -x
+            exec env CARGO_NET_OFFLINE=true HOME=/build ${rustPlatform.rust.cargo}/bin/cargo "$@"
+          ''}/bin:$PATH"
+        '';
+        nativeBuildInputs = attrs.nativeBuildInputs or [] ++ [
+          rustPlatform.cargoSetupHook
+          rustPlatform.bindgenHook
+        ];
+      };
+    };
   };
 
   origSrc = fetchFromGitHub {
@@ -47,6 +86,7 @@ in
 
     nativeBuildInputs = [ makeWrapper which ];
     buildInputs = [ rubyEnv rubyEnv.wrappedRuby rubyEnv.bundler ];
+    passthru = { inherit rubyEnv; };
 
     buildPhase = ''
       echo 'link node_modules'
