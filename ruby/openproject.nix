@@ -5,6 +5,7 @@
 , bundlerEnv
 , fetchNpmDeps
 , nodejs
+, npmHooks
 , ruby_3_3
 , rust
 , writeShellScriptBin
@@ -84,26 +85,31 @@ let
     chmod u+w $out $out/config
     cp ${./gemset.nix} $out/gemset.nix
     cp $out/config/database.production.yml $out/config/database.yml
+    cp $out/packaging/conf/configuration.yml $out/config/configuration.yml
+
   '';
 
-  offlineNpmCache = fetchNpmDeps {
-    src = src + "/frontend";
-    hash = "sha256-8tuu/OIg3YK3dSPy58TvZl/I1VRW6cOiwbU9E3ndmS0=";
-  };
 in
   stdenv.mkDerivation rec {
     pname = "openproject";
     inherit version;
     inherit src;
 
-    nativeBuildInputs = [ makeWrapper which nodejs rubyEnv.wrappedRuby ];
-    passthru = { inherit rubyEnv offlineNpmCache; };
+    nativeBuildInputs = [
+      makeWrapper which
+      nodejs
+      npmHooks.npmConfigHook
+      rubyEnv.wrappedRuby
+    ];
+    passthru = { inherit rubyEnv; };
+
+    npmRoot = "frontend";
+    npmDeps = fetchNpmDeps {
+      src = src + "/frontend";
+      hash = "sha256-8tuu/OIg3YK3dSPy58TvZl/I1VRW6cOiwbU9E3ndmS0=";
+    };
 
     buildPhase = ''
-      echo 'link node_modules'
-      ln -s ${offlineNpmCache}/node_modules ./frontend/node_modules
-      export PATH="${offlineNpmCache}/bin:$PATH"
-
       export BUNDLE_WITHOUT=development:test
       # export BUNDLE_DEPLOYMENT=true ## ignores git deps
 
@@ -114,18 +120,19 @@ in
       export RECOMPILE_RAILS_ASSETS=true
 
       set -x
-      (cd frontend && npm run build)
       bundle exec rails openproject:plugins:register_frontend assets:precompile
       # bundle exec rake assets:prepare_op
       # bundle exec rake openproject:plugins:register_frontend
-      bundle exec rake assets:rebuild_manifest
+      # bundle exec rake assets:rebuild_manifest
+      rm -r bin docker files frontend log nix packaging tmp
       set +x
     '';
 
     installPhase = ''
-      echo "installPhase!"
-
-      makeWrapper ${rubyEnv.wrappedRuby}/bin/ruby $out/bin/rdm-mailhandler.rb --add-flags $out/share/redmine/extra/mail_handler/rdm-mailhandler.rb
+      set -x
+      cp -R . $out
+      # makeWrapper ${rubyEnv.wrappedRuby}/bin/ruby $out/bin/rdm-mailhandler.rb --add-flags $out/share/redmine/extra/mail_handler/rdm-mailhandler.rb
+      set +x
     '';
 
     meta = with lib; {
