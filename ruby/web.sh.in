@@ -1,0 +1,14 @@
+#!@shell@
+
+set -eu
+
+## TODO let nginx handle this
+export OPENPROJECT_ENABLE__INTERNAL__ASSETS__SERVER=true
+export RAILS_ENV=production
+export BUNDLE_WITHOUT=development:test
+
+set -x
+
+cd @openproject@
+mkdir -p @openprojectTmpPath@
+exec @bundle@ exec rails server -u puma "$@"

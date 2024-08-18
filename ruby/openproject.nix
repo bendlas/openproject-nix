@@ -14,6 +14,7 @@
 , makeWrapper
 , which
 , nixosTests
+, openprojectTmpPath ? "/tmp/openproject"
 }:
 
 let
@@ -101,7 +102,7 @@ in
       npmHooks.npmConfigHook
       rubyEnv.wrappedRuby
     ];
-    passthru = { inherit rubyEnv; };
+    passthru = { inherit rubyEnv openprojectTmpPath; };
 
     npmRoot = "frontend";
     npmDeps = fetchNpmDeps {
@@ -124,7 +125,8 @@ in
       # bundle exec rake assets:prepare_op
       # bundle exec rake openproject:plugins:register_frontend
       # bundle exec rake assets:rebuild_manifest
-      rm -r bin docker files frontend log nix packaging tmp
+      rm -r docker files frontend log nix packaging tmp
+      ln -s ${openprojectTmpPath} tmp
       set +x
     '';
 

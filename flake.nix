@@ -55,9 +55,8 @@
       packages = eachSystem (system:
         let
           pkgs = nixpkgsFor.${system};
-        in
-        {
-          openproject = pkgs.openproject;
+        in {
+          inherit (pkgs) openproject openproject-scripts;
         });
 
       nixosConfigurations =

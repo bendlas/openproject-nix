@@ -1,3 +1,4 @@
 final: prev: {
-  openproject = final.callPackage ./ruby/openproject.nix {};
+  openproject-scripts = final.callPackage ./ruby {};
+  inherit (final.openproject-scripts) openproject;
 }
