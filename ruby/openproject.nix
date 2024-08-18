@@ -41,7 +41,7 @@ let
             cp -R container/* $out
           '';
           name = "commonmarker-cargodeps";
-          hash = "sha256-SKUb4SGDM1+RqUk2EzsInNM9nIs7c0Rx0t5mwWZConA=";
+          hash = "sha256-+Pl7aw/FlLTP92PBmzsENFAjRs1KlyzEbcdtx/M03+E=";
         };
         dontBuild = false; ## so that we get rust source
         # CARGO_NET_OFFLINE = "true";
