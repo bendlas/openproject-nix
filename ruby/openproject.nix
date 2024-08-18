@@ -4,6 +4,7 @@
 , runCommand
 , bundlerEnv
 , fetchNpmDeps
+, nodejs
 , ruby_3_3
 , rust
 , writeShellScriptBin
@@ -27,8 +28,18 @@ let
 
     ruby = opf-ruby;
     gemdir = src;
-    groups = [ "development" "ldap" "markdown" "common_mark" "minimagick" "test" ];
-    extraConfigPaths = [ "${src}/Gemfile.modules" ];
+    groups = [
+      # "development" "test"
+      "ldap" "postgres" "production"
+      # "markdown" "common_mark" "minimagick"
+    ];
+    extraConfigPaths = [
+      "${src}/Gemfile.modules"
+      "${src}/modules"
+      "${src}/lib"
+      "${src}/config"
+      "${src}/vendor"
+    ];
     gemConfig = defaultGemConfig // {
       commonmarker = attrs: {
         cargoDeps = rustPlatform.fetchCargoTarball {
@@ -70,8 +81,9 @@ let
 
   src = runCommand "openproject-${version}-src" {} ''
     cp -R ${origSrc} $out
-    chmod u+w $out
+    chmod u+w $out $out/config
     cp ${./gemset.nix} $out/gemset.nix
+    cp $out/config/database.production.yml $out/config/database.yml
   '';
 
   offlineNpmCache = fetchNpmDeps {
@@ -84,28 +96,30 @@ in
     inherit version;
     inherit src;
 
-    nativeBuildInputs = [ makeWrapper which ];
-    buildInputs = [ rubyEnv rubyEnv.wrappedRuby rubyEnv.bundler ];
-    passthru = { inherit rubyEnv; };
+    nativeBuildInputs = [ makeWrapper which nodejs rubyEnv.wrappedRuby ];
+    passthru = { inherit rubyEnv offlineNpmCache; };
 
     buildPhase = ''
       echo 'link node_modules'
       ln -s ${offlineNpmCache}/node_modules ./frontend/node_modules
       export PATH="${offlineNpmCache}/bin:$PATH"
 
-      echo 'wrap ruby'
-      export BUNDLE_GEMFILE=./Gemfile
+      export BUNDLE_WITHOUT=development:test
+      # export BUNDLE_DEPLOYMENT=true ## ignores git deps
 
-      ruby -e 'puts ENV["BUNDLE_GEMFILE"]'
+      ## see <openproject/docker/prod/setup/precompile-assets.sh>
+      export RAILS_ENV=production
+      export DATABASE_URL=nulldb://db
+      export SECRET_KEY_BASE=1
+      export RECOMPILE_RAILS_ASSETS=true
 
-      echo 'rake assets:prepare_op'
-      bundle exec rake assets:prepare_op
-      echo 'rake openproject:plugins:register_frontend'
-      bundle exec rake openproject:plugins:register_frontend
-      echo 'npm build:ci'
-      (cd frontend && npm run build:ci)
-      echo 'rake assets:rebuild_manifest'
+      set -x
+      (cd frontend && npm run build)
+      bundle exec rails openproject:plugins:register_frontend assets:precompile
+      # bundle exec rake assets:prepare_op
+      # bundle exec rake openproject:plugins:register_frontend
       bundle exec rake assets:rebuild_manifest
+      set +x
     '';
 
     installPhase = ''
