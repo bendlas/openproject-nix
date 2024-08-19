@@ -26,7 +26,9 @@
     in
     {
       overlays = {
-        default = (import ./overlay.nix);
+        default = import ./overlay.nix {
+          openprojectStatePath = "/var/lib/openproject";
+        };
       };
       devShells = eachSystem (system:
         let

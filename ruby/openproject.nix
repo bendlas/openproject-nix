@@ -14,7 +14,7 @@
 , makeWrapper
 , which
 , nixosTests
-, openprojectTmpPath ? "/tmp/openproject"
+, openprojectStatePath ? "/tmp/openproject"
 }:
 
 let
@@ -102,7 +102,7 @@ in
       npmHooks.npmConfigHook
       rubyEnv.wrappedRuby
     ];
-    passthru = { inherit rubyEnv openprojectTmpPath; };
+    passthru = { inherit rubyEnv openprojectStatePath; };
 
     npmRoot = "frontend";
     npmDeps = fetchNpmDeps {
@@ -118,7 +118,6 @@ in
       export RAILS_ENV=production
       export DATABASE_URL=nulldb://db
       export SECRET_KEY_BASE=1
-      export RECOMPILE_RAILS_ASSETS=true
 
       set -x
       bundle exec rails openproject:plugins:register_frontend assets:precompile
@@ -126,7 +125,8 @@ in
       # bundle exec rake openproject:plugins:register_frontend
       # bundle exec rake assets:rebuild_manifest
       rm -r docker files frontend log nix packaging tmp
-      ln -s ${openprojectTmpPath} tmp
+      ln -s ${openprojectStatePath}/tmp tmp
+      ln -s ${openprojectStatePath}/files files
       set +x
     '';
 

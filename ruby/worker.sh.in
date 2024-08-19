@@ -2,8 +2,6 @@
 
 set -eu
 
-## TODO let nginx handle this
-export OPENPROJECT_ENABLE__INTERNAL__ASSETS__SERVER=true
 export SECRET_KEY_BASE=$(cat $SECRET_KEY_BASE_FILE)
 
 set -x
@@ -11,4 +9,4 @@ set -x
 cd @openproject@
 mkdir -p @openprojectStatePath@/{tmp,files}
 
-exec @bundle@ exec rails server -u puma "$@"
+exec @bundle@ exec good_job start
