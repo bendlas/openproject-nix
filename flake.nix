@@ -10,30 +10,30 @@
   inputs.devshell.inputs.nixpkgs.follows = "nixpkgs";
   inputs.devshell.inputs.systems.follows = "systems";
 
-  outputs = {self, nixpkgs, systems, devshell }:
-    let
-      eachSystem = nixpkgs.lib.genAttrs (import systems);
-      # Nixpkgs instantiated for system types in nix-systems
-      nixpkgsFor = eachSystem (system:
-        import nixpkgs {
-          inherit system;
-          overlays = [
-            self.overlays.default
-            devshell.overlays.default
-          ];
-        }
-      );
-    in
-    {
-      overlays = {
-        default = import ./overlay.nix {
-          openprojectStatePath = "/var/lib/openproject";
-        };
-      };
-      devShells = eachSystem (system:
-        let
-          pkgs = nixpkgsFor.${system};
-        in
+  outputs = {self, nixpkgs, systems, devshell }: let
+    eachSystem = nixpkgs.lib.genAttrs (import systems);
+    # Nixpkgs instantiated for system types in nix-systems
+    nixpkgsFor = eachSystem (system:
+      import nixpkgs {
+        inherit system;
+        overlays = [
+          self.overlays.openproject
+          devshell.overlays.default
+        ];
+      }
+    );
+  in {
+
+    nixosModules.openproject = ./module.nix;
+    overlays.openproject = import ./overlay.nix { };
+    packages = eachSystem (system: {
+      inherit (nixpkgsFor.${system}) openproject;
+    });
+
+    devShells = eachSystem (system:
+      let
+        pkgs = nixpkgsFor.${system};
+      in
         {
           default = pkgs.devshell.mkShell {
             # Add additional packages you'd like to be available in your devshell
@@ -54,23 +54,14 @@
           };
         });
 
-      packages = eachSystem (system:
-        let
-          pkgs = nixpkgsFor.${system};
-        in {
-          inherit (pkgs) openproject openproject-scripts;
-        });
-
-      nixosConfigurations =
-        let
-          system = "x86_64-linux";
-          pkgs = nixpkgsFor.${system};
-        in
-        {
-          test-vm = nixpkgs.lib.nixosSystem {
-            inherit system pkgs;
-            modules = [./test-vm/configuration.nix];
-          };
-        };
+    nixosConfigurations.test-vm = nixpkgs.lib.nixosSystem rec {
+      system = "x86_64-linux";
+      pkgs = nixpkgsFor.${system};
+      modules = [
+        ./test-vm/configuration.nix
+        self.nixosModules.openproject
+      ];
     };
+
+  };
 }
