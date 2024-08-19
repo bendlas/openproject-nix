@@ -13,10 +13,15 @@ in {
         type = str;
         default = "";
       };
-      bindAddr = mkOption {
+      bind.addr = mkOption {
         type = str;
-        default = "tcp://0.0.0.0:6346";
+        default = "0.0.0.0";
         example = "unix:///run/openproject/http.socket";
+      };
+      bind.port = mkOption {
+        type = nullOr int;
+        default = null;
+        example = 6346;
       };
     };
     package = mkPackageOption pkgs "openproject" { };
@@ -100,7 +105,10 @@ in {
       after = [ "openproject-seeder.service" ];
       wantedBy = [ "multi-user.target" ];
       environment = cfg.environment;
-      serviceConfig.ExecStart = "${cfg.package}/bin/openproject-web -b ${cfg.host.bindAddr}";
+      serviceConfig.ExecStart = "${cfg.package}/bin/openproject-web -b ${cfg.host.bind.addr}${
+        lib.optionalString (! isNull cfg.host.bind.port)
+          " -p ${toString cfg.host.bind.port}"
+      }";
     };
     systemd.services."openproject-worker" = {
       serviceConfig.User = "openproject";
