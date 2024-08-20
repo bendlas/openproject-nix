@@ -15,6 +15,7 @@
 , which
 , nixosTests
 , openprojectStatePath ? "/tmp/openproject"
+, patches ? [ ]
 }:
 
 let
@@ -81,13 +82,16 @@ let
     hash = "sha256-1bOM5exfa8XgfPoSxI2b3ELf8nugOLiVrYAQih893Ak=";
   };
 
-  src = runCommand "openproject-${version}-src" {} ''
+  src = runCommand "openproject-${version}-src" {
+    inherit patches;
+  } ''
     cp -R ${origSrc} $out
-    chmod u+w $out $out/config
+    chmod -R u+w $out
     cp ${./gemset.nix} $out/gemset.nix
     cp $out/config/database.production.yml $out/config/database.yml
     cp $out/packaging/conf/configuration.yml $out/config/configuration.yml
-
+    cd $out
+    patchPhase
   '';
 
 in

@@ -1,8 +1,9 @@
 { stdenv, runCommand, callPackage, postgresql
 , openprojectStatePath ? "/tmp/openproject"
+, patches ? []
 }: let
 
-  openproject = callPackage ./openproject.nix { inherit openprojectStatePath; };
+  openproject = callPackage ./openproject.nix { inherit openprojectStatePath patches; };
 
 in runCommand "openproject-${openproject.version}-scripts" {
   inherit openproject;
