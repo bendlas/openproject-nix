@@ -26,6 +26,9 @@ in {
     secrets.keyBaseFile = mkOption {
       type = str;
     };
+    secrets.extraSeedEnvironmentFile = mkOption {
+      type = str;
+    };
     environment = mkOption {
       type = attrsOf str;
       default = {};
@@ -56,7 +59,6 @@ in {
       ## see https://www.openproject.org/docs/installation-and-operations/configuration/environment/
       environment = {
         OPENPROJECT_HOST__NAME = cfg.host.name;
-        OPENPROJECT_HTTPS = "false";
         OPENPROJECT_HSTS = "false";
         OPENPROJECT_RAILS_CACHE_STORE = "memcache";
         ## FIXME run multiple memcached instances instead
@@ -95,6 +97,7 @@ in {
       serviceConfig.RemainAfterExit = true;
       bindsTo = [ "postgresql.service" ];
       environment = cfg.environment;
+      serviceConfig.EnvironmentFile = cfg.secrets.extraSeedEnvironmentFile;
       serviceConfig.ExecStart = "${cfg.package}/bin/openproject-seeder openproject";
     };
     systemd.services."openproject-web" = {
