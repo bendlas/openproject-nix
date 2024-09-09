@@ -19,7 +19,10 @@
 }:
 
 let
-  version = "14.4.0";
+  version = "14.4.2";
+  opfHash = "sha256-TKU2231FhB37SiERA8c5Cu1LhLODOW1Z6d+6wd0T3Do=";
+  npmDepsHash = "sha256-8tuu/OIg3YK3dSPy58TvZl/I1VRW6cOiwbU9E3ndmS0=";
+  commonmarkerCargoDepsHash = "sha256-+Pl7aw/FlLTP92PBmzsENFAjRs1KlyzEbcdtx/M03+E=";
 
   opf-ruby = ruby_3_3;
 
@@ -55,7 +58,7 @@ let
             cp -R container/* $out
           '';
           name = "commonmarker-cargodeps";
-          hash = "sha256-+Pl7aw/FlLTP92PBmzsENFAjRs1KlyzEbcdtx/M03+E=";
+          hash = commonmarkerCargoDepsHash;
         };
         dontBuild = false; ## so that we get rust source
         # CARGO_NET_OFFLINE = "true";
@@ -79,7 +82,7 @@ let
     owner = "opf";
     repo = "openproject";
     rev = "v${version}";
-    hash = "sha256-1bOM5exfa8XgfPoSxI2b3ELf8nugOLiVrYAQih893Ak=";
+    hash = opfHash;
   };
 
   src = runCommand "openproject-${version}-src" {
@@ -111,7 +114,7 @@ in
     npmRoot = "frontend";
     npmDeps = fetchNpmDeps {
       src = src + "/frontend";
-      hash = "sha256-8tuu/OIg3YK3dSPy58TvZl/I1VRW6cOiwbU9E3ndmS0=";
+      hash = npmDepsHash;
     };
 
     buildPhase = ''
