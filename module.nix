@@ -81,8 +81,6 @@ in {
       };
     };
 
-    hst.secrets.generate."openproject".files."secret_key_base" = {};
-
     users = {
       groups.openproject = {};
       users.openproject = {
