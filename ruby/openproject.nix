@@ -24,6 +24,8 @@ let
   npmDepsHash = "sha256-8tuu/OIg3YK3dSPy58TvZl/I1VRW6cOiwbU9E3ndmS0=";
   commonmarkerCargoDepsHash = "sha256-+Pl7aw/FlLTP92PBmzsENFAjRs1KlyzEbcdtx/M03+E=";
 
+  ## check upstream .ruby-version when updating,
+  ## because that's overridden in the recipe (to override minor version mismatch)
   opf-ruby = ruby_3_3;
 
   rustPackages = rust.packages.stable;
@@ -45,6 +47,7 @@ let
       "${src}/lib"
       "${src}/config"
       "${src}/vendor"
+      "${src}/.ruby-version"
     ];
     gemConfig = defaultGemConfig // {
       commonmarker = attrs: {
@@ -95,6 +98,7 @@ let
     cp $out/packaging/conf/configuration.yml $out/config/configuration.yml
     cd $out
     patchPhase
+    echo "${opf-ruby.version}" > .ruby-version
   '';
 
 in
