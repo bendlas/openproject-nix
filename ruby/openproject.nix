@@ -19,11 +19,10 @@
 }:
 
 let
-  version = "14.4.2";
-  opfHash = "sha256-TKU2231FhB37SiERA8c5Cu1LhLODOW1Z6d+6wd0T3Do=";
-  npmDepsHash = "sha256-8tuu/OIg3YK3dSPy58TvZl/I1VRW6cOiwbU9E3ndmS0=";
-  commonmarkerCargoDepsHash = "sha256-+Pl7aw/FlLTP92PBmzsENFAjRs1KlyzEbcdtx/M03+E=";
-
+  version = "15.0.2";
+  opfHash = "sha256-3PMdAi0BAOVFIbMtC5MZU+zgXuwimidkGUsw8ICVTP4=";
+  commonmarkerCargoDepsHash = "sha256-SKUb4SGDM1+RqUk2EzsInNM9nIs7c0Rx0t5mwWZConA=";
+  npmDepsHash = "sha256-35vUMbQWvgRw/w7eG5iFf5Cm4d9zXRzLL09fnIT7aHQ=";
   ## check upstream .ruby-version when updating,
   ## because that's overridden in the recipe (to override minor version mismatch)
   opf-ruby = ruby_3_3;
@@ -130,7 +129,6 @@ in
       export DATABASE_URL=nulldb://db
       export SECRET_KEY_BASE=1
 
-      set -x
       bundle exec rails openproject:plugins:register_frontend assets:precompile
       # bundle exec rake assets:prepare_op
       # bundle exec rake openproject:plugins:register_frontend
@@ -138,7 +136,6 @@ in
       rm -r docker files frontend log nix packaging tmp
       ln -s ${openprojectStatePath}/tmp tmp
       ln -s ${openprojectStatePath}/files files
-      set +x
     '';
 
     installPhase = ''
