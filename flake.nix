@@ -2,13 +2,9 @@
   description = "OpenProject Nix";
 
   inputs.nixpkgs.url = "github:NixOS/nixpkgs/nixos-unstable";
-  # inputs.nixpkgs.url = "github:pub-solar/nixpkgs/ruby-gemfile-relative-modules";
-
-  inputs.systems.url = "github:nix-systems/default";
 
   inputs.devshell.url = "github:numtide/devshell";
   inputs.devshell.inputs.nixpkgs.follows = "nixpkgs";
-  inputs.devshell.inputs.systems.follows = "systems";
 
   outputs = { self, nixpkgs, systems, devshell }: let
     eachSystem = nixpkgs.lib.genAttrs (import systems);

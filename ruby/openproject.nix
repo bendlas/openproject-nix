@@ -19,10 +19,10 @@
 }:
 
 let
-  version = "15.0.2";
-  opfHash = "sha256-3PMdAi0BAOVFIbMtC5MZU+zgXuwimidkGUsw8ICVTP4=";
+  version = "15.1.0";
+  opfHash = "sha256-+NoDMhypVhg1krdIG/BneHE/iLt4AZI4kUKbUpEphGw=";
   commonmarkerCargoDepsHash = "sha256-SKUb4SGDM1+RqUk2EzsInNM9nIs7c0Rx0t5mwWZConA=";
-  npmDepsHash = "sha256-35vUMbQWvgRw/w7eG5iFf5Cm4d9zXRzLL09fnIT7aHQ=";
+  npmDepsHash = "sha256-ZPYmFHARUiFwBJ8iZhtCPLRA+n98FzONfpbdLLS3Oow=";
   ## check upstream .ruby-version when updating,
   ## because that's overridden in the recipe (to override minor version mismatch)
   opf-ruby = ruby_3_3;
