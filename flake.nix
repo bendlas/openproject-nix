@@ -10,7 +10,7 @@
   inputs.devshell.inputs.nixpkgs.follows = "nixpkgs";
   inputs.devshell.inputs.systems.follows = "systems";
 
-  outputs = {self, nixpkgs, systems, devshell }: let
+  outputs = { self, nixpkgs, systems, devshell }: let
     eachSystem = nixpkgs.lib.genAttrs (import systems);
     # Nixpkgs instantiated for system types in nix-systems
     nixpkgsFor = eachSystem (system:
@@ -53,15 +53,6 @@
             '';
           };
         });
-
-    nixosConfigurations.test-vm = nixpkgs.lib.nixosSystem rec {
-      system = "x86_64-linux";
-      pkgs = nixpkgsFor.${system};
-      modules = [
-        ./test-vm/configuration.nix
-        self.nixosModules.openproject
-      ];
-    };
 
   };
 }
