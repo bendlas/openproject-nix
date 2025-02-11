@@ -19,9 +19,9 @@
 }:
 
 let
-  version = "15.2.0";
-  opfHash = "sha256-Kgz9BKhjHTLkB0nXPvPyG3HHj8nK1e5Y/g7yD2WsoAM=";
-  commonmarkerCargoDepsHash = "sha256-SKUb4SGDM1+RqUk2EzsInNM9nIs7c0Rx0t5mwWZConA=";
+  version = "15.2.1";
+  opfHash = "sha256-hxg/cdUWXfVuPDiZP7lNl0uT1xavmNjDY/4Dt0ks5dg=";
+  commonmarkerCargoDepsHash = "sha256-EeTXPsA0EmoI23yidfC/4IuQFPXbnZlVe5fjBiHnR/c=";
   npmDepsHash = "sha256-1+ckWxlVmbxDU6yiVwBjzpqCps4MT9nkvLRwp6rcZuM=";
   ## check upstream .ruby-version when updating,
   ## because that's overridden in the recipe (to override minor version mismatch)
