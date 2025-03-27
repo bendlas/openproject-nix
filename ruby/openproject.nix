@@ -6,7 +6,7 @@
 , fetchNpmDeps
 , nodejs
 , npmHooks
-, ruby_3_3
+, ruby_3_4
 , rust
 , writeShellScriptBin
 , defaultGemConfig
@@ -19,13 +19,13 @@
 }:
 
 let
-  version = "15.2.1";
-  opfHash = "sha256-hxg/cdUWXfVuPDiZP7lNl0uT1xavmNjDY/4Dt0ks5dg=";
-  commonmarkerCargoDepsHash = "sha256-EeTXPsA0EmoI23yidfC/4IuQFPXbnZlVe5fjBiHnR/c=";
-  npmDepsHash = "sha256-1+ckWxlVmbxDU6yiVwBjzpqCps4MT9nkvLRwp6rcZuM=";
+  version = "15.4.2";
+  opfHash = "sha256-adjWbfCoVhPgP45P/VDq6BqyTcRar7gP/THNWssaHpc=";
+  commonmarkerCargoDepsHash = "sha256-pirO25Da5RoVk8d9/vtKA9n1pjJOkQJ7FxIpvUhbjaM=";
+  npmDepsHash = "sha256-+k2GmzJvuQJjfEeQRZD4JB1a2/SNDmFqYuNuJTb8K6o=";
   ## check upstream .ruby-version when updating,
   ## because that's overridden in the recipe (to override minor version mismatch)
-  opf-ruby = ruby_3_3;
+  opf-ruby = ruby_3_4;
 
   rustPackages = rust.packages.stable;
   rustPlatform = rustPackages.rustPlatform;
