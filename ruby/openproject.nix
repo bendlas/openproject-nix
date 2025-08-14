@@ -8,6 +8,7 @@
 , npmHooks
 , ruby_3_4
 , rust
+, rustc
 , writeShellScriptBin
 , defaultGemConfig
 , buildRubyGem
@@ -19,10 +20,11 @@
 }:
 
 let
-  version = "15.4.2";
-  opfHash = "sha256-adjWbfCoVhPgP45P/VDq6BqyTcRar7gP/THNWssaHpc=";
-  commonmarkerCargoDepsHash = "sha256-pirO25Da5RoVk8d9/vtKA9n1pjJOkQJ7FxIpvUhbjaM=";
-  npmDepsHash = "sha256-+k2GmzJvuQJjfEeQRZD4JB1a2/SNDmFqYuNuJTb8K6o=";
+  version = "16.3.1";
+  opfHash = "sha256-dEK3OWxKM4yWX6TvSxHkoB/LklHCOojnKnOjdsmU0Q4=";
+  commonmarkerCargoDepsHash = "sha256-ZbxKKdc6m4An3OMxhvhVFR8M3fJGc6C0Obojtg4vgfU=";
+  prometheusClientMmapCargoDepsHash = "sha256-ojfL0KtI+GJw13qArqcBgq0zdLEJO6OIWxQtimHxCaI=";
+  npmDepsHash = "sha256-JFjA5/WU1b5wQVGkf8ADizB/FSFJRHFDDMSyAZJ8HxM=";
   ## check upstream .ruby-version when updating,
   ## because that's overridden in the recipe (to override minor version mismatch)
   opf-ruby = ruby_3_4;
@@ -49,6 +51,35 @@ let
       "${src}/.ruby-version"
     ];
     gemConfig = defaultGemConfig // {
+      prometheus-client-mmap = attrs: {
+        cargoDeps = rustPlatform.fetchCargoTarball {
+          ## Uglyhack gem unpack
+          ## see <nixpkgs/pkgs/development/ruby-modules/gem>
+          src = runCommand "prometheus-client-mmap-src" {
+            inherit (buildRubyGem attrs) src;
+          } ''
+            ${opf-ruby}/bin/gem unpack $src --target=container
+            cp -R container/* $out
+          '';
+          name = "prometheus-client-mmap-cargodeps";
+          hash = prometheusClientMmapCargoDepsHash;
+        };
+        dontBuild = false; ## so that we get rust source
+        # CARGO_NET_OFFLINE = "true";
+        # HOME = "/build"; # for finding cargo conf
+        # exec ${rust.envVars.setEnv} CARGO_NET_OFFLINE=true HOME=/build ${rustPlatform.rust.cargo}/bin/cargo "$@"
+        preInstall = attrs.preInstall or "" + ''
+          export PATH="${writeShellScriptBin "cargo" ''
+            set -x
+            exec env CARGO_NET_OFFLINE=true HOME=/build ${rustPlatform.rust.cargo}/bin/cargo "$@"
+          ''}/bin:$PATH"
+        '';
+        nativeBuildInputs = attrs.nativeBuildInputs or [] ++ [
+          rustc
+          rustPlatform.cargoSetupHook
+          rustPlatform.bindgenHook
+        ];
+      };
       commonmarker = attrs: {
         cargoDeps = rustPlatform.fetchCargoTarball {
           ## Uglyhack gem unpack
@@ -119,6 +150,8 @@ in
       src = src + "/frontend";
       hash = npmDepsHash;
     };
+
+    makeCacheWritable = true;
 
     buildPhase = ''
       export BUNDLE_WITHOUT=development:test
