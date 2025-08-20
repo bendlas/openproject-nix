@@ -26,6 +26,9 @@ in {
     secrets.keyBaseFile = mkOption {
       type = str;
     };
+    secrets.environmentFile = mkOption {
+      type = str;
+    };
     secrets.extraSeedEnvironmentFile = mkOption {
       type = str;
     };
@@ -95,7 +98,10 @@ in {
       serviceConfig.RemainAfterExit = true;
       bindsTo = [ "postgresql.service" ];
       environment = cfg.environment;
-      serviceConfig.EnvironmentFile = cfg.secrets.extraSeedEnvironmentFile;
+      serviceConfig.EnvironmentFile = [
+        cfg.secrets.extraSeedEnvironmentFile
+        cfg.secrets.environmentFile
+      ];
       serviceConfig.ExecStart = "${cfg.package}/bin/openproject-seeder openproject";
     };
     systemd.services."openproject-web" = {
@@ -104,6 +110,7 @@ in {
       after = [ "openproject-seeder.service" ];
       wantedBy = [ "multi-user.target" ];
       environment = cfg.environment;
+      serviceConfig.EnvironmentFile = [ cfg.secrets.environmentFile ];
       serviceConfig.ExecStart = "${cfg.package}/bin/openproject-web -b ${cfg.host.bind.addr} -p ${toString cfg.host.bind.port}";
     };
     systemd.services."openproject-worker" = {
@@ -112,6 +119,7 @@ in {
       after = [ "openproject-seeder.service" ];
       wantedBy = [ "multi-user.target" ];
       environment = cfg.environment;
+      serviceConfig.EnvironmentFile = [ cfg.secrets.environmentFile ];
       serviceConfig.ExecStart = "${cfg.package}/bin/openproject-worker";
     };
     systemd.services."openproject-cron" = {
@@ -119,6 +127,7 @@ in {
       bindsTo = [ "openproject-seeder.service" ];
       after = [ "openproject-seeder.service" ];
       environment = cfg.environment;
+      serviceConfig.EnvironmentFile = [ cfg.secrets.environmentFile ];
       serviceConfig.ExecStart = mkIf cfg.imap.enable "${cfg.package}/bin/openproject-cron-step-imap";
     };
     systemd.timers."openproject-cron" = {
