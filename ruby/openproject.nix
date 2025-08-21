@@ -22,8 +22,8 @@
 let
   version = "16.3.1";
   opfHash = "sha256-dEK3OWxKM4yWX6TvSxHkoB/LklHCOojnKnOjdsmU0Q4=";
-  commonmarkerCargoDepsHash = "sha256-ZbxKKdc6m4An3OMxhvhVFR8M3fJGc6C0Obojtg4vgfU=";
-  prometheusClientMmapCargoDepsHash = "sha256-ojfL0KtI+GJw13qArqcBgq0zdLEJO6OIWxQtimHxCaI=";
+  commonmarkerCargoDepsHash = "sha256-LzuUOxgG8uD6ADFe7ZeDyapAK9dcCB2BohCZT+KOLBg=";
+  prometheusClientMmapCargoDepsHash = "sha256-mukk+tWWeG62q4GcDzkk8TyxVsDjShz30wEj82cElt4=";
   npmDepsHash = "sha256-JFjA5/WU1b5wQVGkf8ADizB/FSFJRHFDDMSyAZJ8HxM=";
   ## check upstream .ruby-version when updating,
   ## because that's overridden in the recipe (to override minor version mismatch)
@@ -52,7 +52,7 @@ let
     ];
     gemConfig = defaultGemConfig // {
       prometheus-client-mmap = attrs: {
-        cargoDeps = rustPlatform.fetchCargoTarball {
+        cargoDeps = rustPlatform.fetchCargoVendor {
           ## Uglyhack gem unpack
           ## see <nixpkgs/pkgs/development/ruby-modules/gem>
           src = runCommand "prometheus-client-mmap-src" {
@@ -65,13 +65,10 @@ let
           hash = prometheusClientMmapCargoDepsHash;
         };
         dontBuild = false; ## so that we get rust source
-        # CARGO_NET_OFFLINE = "true";
-        # HOME = "/build"; # for finding cargo conf
-        # exec ${rust.envVars.setEnv} CARGO_NET_OFFLINE=true HOME=/build ${rustPlatform.rust.cargo}/bin/cargo "$@"
         preInstall = attrs.preInstall or "" + ''
           export PATH="${writeShellScriptBin "cargo" ''
             set -x
-            exec env CARGO_NET_OFFLINE=true HOME=/build ${rustPlatform.rust.cargo}/bin/cargo "$@"
+            exec env CARGO_NET_OFFLINE=true HOME=/build ${rustPackages.cargo}/bin/cargo "$@"
           ''}/bin:$PATH"
         '';
         nativeBuildInputs = attrs.nativeBuildInputs or [] ++ [
@@ -81,7 +78,7 @@ let
         ];
       };
       commonmarker = attrs: {
-        cargoDeps = rustPlatform.fetchCargoTarball {
+        cargoDeps = rustPlatform.fetchCargoVendor {
           ## Uglyhack gem unpack
           ## see <nixpkgs/pkgs/development/ruby-modules/gem>
           src = runCommand "commonmarker-src" {
@@ -94,13 +91,10 @@ let
           hash = commonmarkerCargoDepsHash;
         };
         dontBuild = false; ## so that we get rust source
-        # CARGO_NET_OFFLINE = "true";
-        # HOME = "/build"; # for finding cargo conf
-        # exec ${rust.envVars.setEnv} CARGO_NET_OFFLINE=true HOME=/build ${rustPlatform.rust.cargo}/bin/cargo "$@"
         preInstall = attrs.preInstall or "" + ''
           export PATH="${writeShellScriptBin "cargo" ''
             set -x
-            exec env CARGO_NET_OFFLINE=true HOME=/build ${rustPlatform.rust.cargo}/bin/cargo "$@"
+            exec env CARGO_NET_OFFLINE=true HOME=/build ${rustPackages.cargo}/bin/cargo "$@"
           ''}/bin:$PATH"
         '';
         nativeBuildInputs = attrs.nativeBuildInputs or [] ++ [
