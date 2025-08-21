@@ -27,10 +27,12 @@ in {
       type = str;
     };
     secrets.environmentFile = mkOption {
-      type = str;
+      type = nullOr str;
+      default = null;
     };
     secrets.extraSeedEnvironmentFile = mkOption {
-      type = str;
+      type = nullOr str;
+      default = null;
     };
     environment = mkOption {
       type = attrsOf str;
@@ -98,7 +100,7 @@ in {
       serviceConfig.RemainAfterExit = true;
       bindsTo = [ "postgresql.service" ];
       environment = cfg.environment;
-      serviceConfig.EnvironmentFile = [
+      serviceConfig.EnvironmentFile = remove null [
         cfg.secrets.extraSeedEnvironmentFile
         cfg.secrets.environmentFile
       ];
@@ -110,7 +112,7 @@ in {
       after = [ "openproject-seeder.service" ];
       wantedBy = [ "multi-user.target" ];
       environment = cfg.environment;
-      serviceConfig.EnvironmentFile = [ cfg.secrets.environmentFile ];
+      serviceConfig.EnvironmentFile = remove null [ cfg.secrets.environmentFile ];
       serviceConfig.ExecStart = "${cfg.package}/bin/openproject-web -b ${cfg.host.bind.addr} -p ${toString cfg.host.bind.port}";
     };
     systemd.services."openproject-worker" = {
@@ -119,7 +121,7 @@ in {
       after = [ "openproject-seeder.service" ];
       wantedBy = [ "multi-user.target" ];
       environment = cfg.environment;
-      serviceConfig.EnvironmentFile = [ cfg.secrets.environmentFile ];
+      serviceConfig.EnvironmentFile = remove null [ cfg.secrets.environmentFile ];
       serviceConfig.ExecStart = "${cfg.package}/bin/openproject-worker";
     };
     systemd.services."openproject-cron" = {
@@ -127,7 +129,7 @@ in {
       bindsTo = [ "openproject-seeder.service" ];
       after = [ "openproject-seeder.service" ];
       environment = cfg.environment;
-      serviceConfig.EnvironmentFile = [ cfg.secrets.environmentFile ];
+      serviceConfig.EnvironmentFile = remove null [ cfg.secrets.environmentFile ];
       serviceConfig.ExecStart = mkIf cfg.imap.enable "${cfg.package}/bin/openproject-cron-step-imap";
     };
     systemd.timers."openproject-cron" = {
