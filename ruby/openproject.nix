@@ -20,11 +20,10 @@
 }:
 
 let
-  version = "16.3.2";
-  opfHash = "sha256-cHs7zPKj2rkIBFcqY29S3jimKX4RDfFukiQhRIUKiNk=";
-  commonmarkerCargoDepsHash = "sha256-LzuUOxgG8uD6ADFe7ZeDyapAK9dcCB2BohCZT+KOLBg=";
-  prometheusClientMmapCargoDepsHash = "sha256-mukk+tWWeG62q4GcDzkk8TyxVsDjShz30wEj82cElt4=";
-  npmDepsHash = "sha256-PxFS9Lt3AyLqZkR4tQM9tuTMsUR8q5VFMlzGDhrgMsE=";
+  version = "16.6.2";
+  opfHash = "sha256-vsFILk1qsTxZlGQxxrKzkroWjYSiHe4uQqbrxRzAgLs=";
+  commonmarkerCargoDepsHash = "sha256-5ZEkaAFsseX/41UOuyfXK2MUG6TL1SJpqPojD5fN80s=";
+  npmDepsHash = "sha256-OOfG8ZgkCmgwDFH33Qiqarcksd/sJdU+pxjiB8RToaA=";
   ## check upstream .ruby-version when updating,
   ## because that's overridden in the recipe (to override minor version mismatch)
   opf-ruby = ruby_3_4;
@@ -51,32 +50,7 @@ let
       "${src}/.ruby-version"
     ];
     gemConfig = defaultGemConfig // {
-      prometheus-client-mmap = attrs: {
-        cargoDeps = rustPlatform.fetchCargoVendor {
-          ## Uglyhack gem unpack
-          ## see <nixpkgs/pkgs/development/ruby-modules/gem>
-          src = runCommand "prometheus-client-mmap-src" {
-            inherit (buildRubyGem attrs) src;
-          } ''
-            ${opf-ruby}/bin/gem unpack $src --target=container
-            cp -R container/* $out
-          '';
-          name = "prometheus-client-mmap-cargodeps";
-          hash = prometheusClientMmapCargoDepsHash;
-        };
-        dontBuild = false; ## so that we get rust source
-        preInstall = attrs.preInstall or "" + ''
-          export PATH="${writeShellScriptBin "cargo" ''
-            set -x
-            exec env CARGO_NET_OFFLINE=true HOME=/build ${rustPackages.cargo}/bin/cargo "$@"
-          ''}/bin:$PATH"
-        '';
-        nativeBuildInputs = attrs.nativeBuildInputs or [] ++ [
-          rustc
-          rustPlatform.cargoSetupHook
-          rustPlatform.bindgenHook
-        ];
-      };
+
       commonmarker = attrs: {
         cargoDeps = rustPlatform.fetchCargoVendor {
           ## Uglyhack gem unpack
@@ -102,6 +76,7 @@ let
           rustPlatform.bindgenHook
         ];
       };
+
     };
   };
 
