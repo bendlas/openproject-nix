@@ -20,10 +20,11 @@
 }:
 
 let
-  version = "17.0.1";
-  opfHash = "sha256-kNbB4kIY+2fjd978PsQdWu/huqs93KyBl9668kHbGas=";
-  commonmarkerCargoDepsHash = "sha256-Osj+WzyTQlcMtgkqvhRquLkVMK4z2HYafr4t42qsxe8=";
-  npmDepsHash = "sha256-kCRmd/dgY2PbnyIbpsfyYgAJdjx7sXTqmRlUxsnClUc=";
+  version = "17.2.2";
+  opfHash = "sha256-YrLPqWKMWgjBwywntul/SmcI5ed0lK8xmUtKx1qIQAo=";
+  commonmarkerCargoDepsHash = "sha256-y0w9rJa2HG9zbX1thf0JznuhSvi7VL5pzMoskZzziUc=";
+  prometheusClientMmapDepsHash = "sha256-7jqaf5RIsc9gq98WBCe3Dd3Fv2X+4echdXU1FSK/xnE=";
+  npmDepsHash = "sha256-dWWf8ukDCFwc2UuUUqFQHhpWVyJKzo215WiU96U7SPc=";
   ## check upstream .ruby-version when updating,
   ## because that's overridden in the recipe (to override minor version mismatch)
   opf-ruby = ruby_3_4;
@@ -78,6 +79,51 @@ let
         ];
       };
 
+
+      prometheus-client-mmap = attrs: {
+        dontBuild = false;
+        postPatch = let
+          getconf = if stdenv.hostPlatform.isGnu then stdenv.cc.libc else getconf;
+        in ''
+          substituteInPlace lib/prometheus/client/page_size.rb --replace "getconf" "${lib.getBin getconf}/bin/getconf"
+        '';
+        cargoDeps = rustPlatform.fetchCargoVendor {
+          src = stdenv.mkDerivation {
+            inherit (buildRubyGem { inherit (attrs) gemName version source; })
+              name
+              src
+              unpackPhase
+              nativeBuildInputs
+              ;
+            dontBuilt = true;
+            installPhase = ''
+              cp -R ext/fast_mmaped_file_rs $out
+              rm $out/Cargo.lock
+              cp Cargo.lock $out
+            '';
+          };
+          hash = prometheusClientMmapDepsHash;
+        };
+
+        nativeBuildInputs = [
+          rustPlatform.rust.cargo
+          rustPlatform.rust.rustc
+          rustPlatform.cargoSetupHook
+          rustPlatform.bindgenHook
+        ];
+
+        disallowedReferences = [
+          rustPlatform.rust.rustc.unwrapped
+        ];
+
+        preInstall = ''
+          export CARGO_HOME="$PWD/../.cargo/"
+        '';
+
+        postInstall = ''
+          find $out -type f -name .rustc_info.json -delete
+        '';
+      };
     };
   };
 
@@ -94,6 +140,7 @@ let
     cp -R ${origSrc} $out
     chmod -R u+w $out
     cp ${./gemset.nix} $out/gemset.nix
+    cp ${./Gemfile.lock} $out/Gemfile.lock
     cp $out/config/database.production.yml $out/config/database.yml
     cp $out/packaging/conf/configuration.yml $out/config/configuration.yml
     cd $out
