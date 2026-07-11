@@ -4,9 +4,9 @@
 , runCommand
 , bundlerEnv
 , fetchNpmDeps
-, nodejs_22
+, nodejs_24
 , npmHooks
-, ruby_3_4
+, ruby_4_0
 , rust
 , rustc
 , writeShellScriptBin
@@ -20,15 +20,15 @@
 }:
 
 let
-  version = "17.2.2";
-  opfHash = "sha256-YrLPqWKMWgjBwywntul/SmcI5ed0lK8xmUtKx1qIQAo=";
-  commonmarkerCargoDepsHash = "sha256-y0w9rJa2HG9zbX1thf0JznuhSvi7VL5pzMoskZzziUc=";
+  version = "17.6.0";
+  opfHash = "sha256-Mi6IqReSDeGIgmqlH2Hfk94b7G8vMoMN6WMBjTQOXJs=";
+  commonmarkerCargoDepsHash = "sha256-jRBuyAh7eyrfK7b1jjezcUxCbkZDQjWKSjtWpfexBuY=";
   prometheusClientMmapDepsHash = "sha256-7jqaf5RIsc9gq98WBCe3Dd3Fv2X+4echdXU1FSK/xnE=";
-  npmDepsHash = "sha256-dWWf8ukDCFwc2UuUUqFQHhpWVyJKzo215WiU96U7SPc=";
+  npmDepsHash = "sha256-9Yk07lTG+2/PKUfMU6AKGkBTuv0N4Jq65+gY/YVNOYg=";
   ## check upstream .ruby-version when updating,
   ## because that's overridden in the recipe (to override minor version mismatch)
-  opf-ruby = ruby_3_4;
-  nodejs = nodejs_22;
+  opf-ruby = ruby_4_0;
+  nodejs = nodejs_24;
 
   rustPackages = rust.packages.stable;
   rustPlatform = rustPackages.rustPlatform;
