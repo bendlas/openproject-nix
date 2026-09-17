@@ -20,11 +20,11 @@
 }:
 
 let
-  version = "17.6.0";
-  opfHash = "sha256-Mi6IqReSDeGIgmqlH2Hfk94b7G8vMoMN6WMBjTQOXJs=";
-  commonmarkerCargoDepsHash = "sha256-jRBuyAh7eyrfK7b1jjezcUxCbkZDQjWKSjtWpfexBuY=";
-  prometheusClientMmapDepsHash = "sha256-7jqaf5RIsc9gq98WBCe3Dd3Fv2X+4echdXU1FSK/xnE=";
-  npmDepsHash = "sha256-9Yk07lTG+2/PKUfMU6AKGkBTuv0N4Jq65+gY/YVNOYg=";
+  version = "17.8.0";
+  opfHash = "sha256-du9tFgHexhYtUM6RH+aXIFRz+jqcC/THmCKELk8QFbE=";
+  commonmarkerCargoDepsHash = "sha256-Xw0VWl3qZLvNNmRFHuWkltC1XfoIaHJKWM8Po4FSmoQ=";
+  prometheusClientMmapDepsHash = "sha256-lhD8vlqK9a38ZLBD6YagWnJ/DQ8YqbC1NxEyzYnoLh8=";
+  npmDepsHash = "sha256-vyJRS+fs46p6CICF6OdCBs8O5WN+ivLBwB4gvWuDaWQ=";
   ## check upstream .ruby-version when updating,
   ## because that's overridden in the recipe (to override minor version mismatch)
   opf-ruby = ruby_4_0;
