@@ -15,6 +15,8 @@
 , makeWrapper
 , which
 , nixosTests
+, oniguruma
+, pkg-config
 , openprojectStatePath ? "/tmp/openproject"
 , patches ? [ ]
 }:
@@ -73,9 +75,11 @@ let
             exec env CARGO_NET_OFFLINE=true HOME=/build ${rustPackages.cargo}/bin/cargo "$@"
           ''}/bin:$PATH"
         '';
+        buildInputs = [ oniguruma ];
         nativeBuildInputs = attrs.nativeBuildInputs or [] ++ [
           rustPlatform.cargoSetupHook
           rustPlatform.bindgenHook
+          pkg-config
         ];
       };
 
